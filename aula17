@@ -1,0 +1,56 @@
+
+CREATE DATABASE EstoqueDB;
+USE EstoqueDB;
+
+CREATE TABLE Produtos (
+    ProdutoID INT PRIMARY KEY,  
+    ProdutoNome VARCHAR(255)   
+);
+
+CREATE TABLE Fornecedores (
+    FornecedorID INT PRIMARY KEY, 
+    NomeFornecedor VARCHAR(255)    
+);
+
+CREATE TABLE Estoque (
+    EstoqueID INT PRIMARY KEY,      
+    ProdutoID INT,                   
+    FornecedorID INT,               
+    Quantidade INT,                 
+    DataEntrada DATE,                
+    FOREIGN KEY (ProdutoID) REFERENCES Produtos(ProdutoID),  
+    FOREIGN KEY (FornecedorID) REFERENCES Fornecedores(FornecedorID) 
+);
+
+-- FULL OUTER JOIN
+SELECT 
+    E.EstoqueID, 
+    P.ProdutoNome, 
+    F.NomeFornecedor, 
+    E.Quantidade, 
+    E.DataEntrada
+FROM 
+    Estoque E
+FULL OUTER JOIN 
+    Produtos P ON E.ProdutoID = P.ProdutoID
+FULL OUTER JOIN 
+    Fornecedores F ON E.FornecedorID = F.FornecedorID;
+
+-- GROUP BY
+SELECT 
+    F.NomeFornecedor, 
+    P.ProdutoNome, 
+    SUM(E.Quantidade) AS TotalQuantidade
+FROM 
+    Estoque E
+JOIN 
+    Produtos P ON E.ProdutoID = P.ProdutoID
+JOIN 
+    Fornecedores F ON E.FornecedorID = F.FornecedorID
+GROUP BY 
+    F.NomeFornecedor, P.ProdutoNome;
+
+
+-- ALTER TABLE
+ALTER TABLE Estoque
+ADD COLUMN Status VARCHAR(20);
