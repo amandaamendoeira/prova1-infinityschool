@@ -1,4 +1,6 @@
+import datetime
 import flet as ft
+
 
 class Cliente:
     def __init__(self, nome, cpf, email):
@@ -6,11 +8,13 @@ class Cliente:
         self.cpf = cpf
         self.email = email
 
+
 class Quarto:
     def __init__(self, numero, tipo):
         self.numero = numero
         self.tipo = tipo
         self.disponivel = True
+
 
 class Reserva:
     def __init__(self, cliente, quarto, data_entrada, data_saida):
@@ -18,6 +22,7 @@ class Reserva:
         self.quarto = quarto
         self.data_entrada = data_entrada
         self.data_saida = data_saida
+
 
 class GerenciadorDeReservas:
     def __init__(self):
@@ -35,13 +40,14 @@ class GerenciadorDeReservas:
         if quarto.disponivel:
             reserva = Reserva(cliente, quarto, data_entrada, data_saida)
             self.reservas.append(reserva)
-            quarto.disponivel = False 
+            quarto.disponivel = False
             return True
         return False
 
     def cancelar_reserva(self, reserva):
         self.reservas.remove(reserva)
-        reserva.quarto.disponivel = True 
+        reserva.quarto.disponivel = True
+
 
 def main(page: ft.Page):
     page.bgcolor = ft.colors.OUTLINE_VARIANT
@@ -70,24 +76,13 @@ def main(page: ft.Page):
 
     def button_clicked_reserva(e):
         selected_cliente = dropdown_clientes.value
-        data_in = data_entrada.value
-        data_out = data_saida.value
         quarto_num = dropdown_quartos_reserva.value
 
-        cliente_info = None
-        for c in gerenciador.clientes:
-            if f"{c.nome} (CPF: {c.cpf})" == selected_cliente:
-                cliente_info = c
-                break 
+        cliente_info = next((c for c in gerenciador.clientes if f"{c.nome} (CPF: {c.cpf})" == selected_cliente), None)
+        quarto = next((q for q in gerenciador.quartos if q.numero == quarto_num), None)
 
-        quarto = None
-        for q in gerenciador.quartos:
-            if q.numero == quarto_num:
-                quarto = q
-                break 
-
-        if selected_cliente and data_in and data_out and cliente_info and quarto:
-            if gerenciador.fazer_reserva(cliente_info, quarto, data_in, data_out):
+        if selected_cliente and data_entrada.value and data_saida.value and cliente_info and quarto:
+            if gerenciador.fazer_reserva(cliente_info, quarto, data_entrada.value, data_saida.value):
                 update_reserva_table()
                 texto_quarto.value = "Reserva registrada com sucesso."
             else:
@@ -118,12 +113,41 @@ def main(page: ft.Page):
         texto_quarto.value = "Reserva cancelada com sucesso."
         page.update()
 
+    def open_date_picker_entrada(e):
+        page.open(
+        ft.DatePicker(
+            first_date=datetime.datetime(day=1, month=1, year=2001),
+            last_date=datetime.datetime(day=31, month=12, year=2030),
+            on_change=date_selected_entrada,
+        )
+    )
+
+    def date_selected_entrada(e):
+        if e.control.value:
+            data_entrada.value = e.control.value.strftime('%d-%m-%Y')
+            page.update()
+
+    def open_date_picker_saida(e):
+        page.open(
+            ft.DatePicker(
+                first_date=datetime.datetime(day=1, month=1, year=2001),
+                last_date=datetime.datetime(day=31, month=12, year=2030),
+                on_change=date_selected_saida,
+            )
+        )
+
+    def date_selected_saida(e):
+        if e.control.value:
+            data_saida.value = e.control.value.strftime('%d-%m-%Y')
+            page.update()
+
+
     nome = ft.TextField(label="Nome", border_color=ft.colors.CYAN_ACCENT_700, hint_text="Insira aqui", bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY)
     cpf = ft.TextField(label="CPF", border_color=ft.colors.CYAN_ACCENT_700, hint_text="Insira aqui", bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY)
     email = ft.TextField(label="E-mail", border_color=ft.colors.CYAN_ACCENT_700, hint_text="Insira aqui", icon=ft.icons.EMAIL, bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY)
 
     botao_cliente = ft.ElevatedButton(text="Cadastrar Cliente", bgcolor=ft.colors.CYAN_ACCENT_700, color=ft.colors.WHITE, on_click=button_clicked_cliente, style=ft.ButtonStyle(
-            text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)))
+        text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)))
 
     dropdown_tipo_quarto = ft.Dropdown(
         label="Tipo de Quarto",
@@ -139,17 +163,17 @@ def main(page: ft.Page):
     dropdown_quartos_reserva = ft.Dropdown(
         label="Número do Quarto",
         options=[
-            ft.dropdown.Option("1"),
-            ft.dropdown.Option("2"),
-            ft.dropdown.Option("3"),
-            ft.dropdown.Option("4"),
+            ft.dropdown.Option("101"),
+            ft.dropdown.Option("201"),
+            ft.dropdown.Option("301"),
+            ft.dropdown.Option("401"),
         ],
         bgcolor=ft.colors.ON_TERTIARY,
         color=ft.colors.TERTIARY
     )
 
     botao_quarto = ft.ElevatedButton(text="Adicionar Quarto", bgcolor=ft.colors.CYAN_ACCENT_700, color=ft.colors.WHITE, on_click=button_clicked_quarto, style=ft.ButtonStyle(
-            text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)))
+        text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)))
     texto_quarto = ft.Text()
 
     tab_clientes = ft.Tab(
@@ -181,11 +205,11 @@ def main(page: ft.Page):
         color=ft.colors.TERTIARY
     )
 
-    data_entrada = ft.TextField(label="Data de Entrada (DD-MM-YYYY)", hint_text="Ex: 01-01-2023", bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY)
-    data_saida = ft.TextField(label="Data de Saída (DD-MM-YYYY)", hint_text="Ex: 10-01-2023", bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY)
+    data_entrada = ft.TextField(label="Data de Entrada", hint_text="Clique para selecionar", bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY, read_only=True)
+    data_saida = ft.TextField(label="Data de Saída", hint_text="Clique para selecionar", bgcolor=ft.colors.ON_TERTIARY, color=ft.colors.TERTIARY, read_only=True)
 
     botao_reserva = ft.ElevatedButton(text="Registrar Reserva", bgcolor=ft.colors.CYAN_ACCENT_700, color=ft.colors.WHITE, on_click=button_clicked_reserva, style=ft.ButtonStyle(
-            text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)))
+        text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)))
 
     data_table = ft.DataTable(
         columns=[
@@ -205,13 +229,19 @@ def main(page: ft.Page):
         text="Reservas",
         content=ft.Container(
             content=ft.Column(
-                controls=[dropdown_clientes, data_entrada, data_saida, botao_reserva, texto_quarto, data_table],
+                controls=[
+                    dropdown_clientes,
+                    ft.Row(controls=[data_entrada, ft.IconButton(icon=ft.icons.CALENDAR_MONTH, on_click=open_date_picker_entrada)]),
+                    ft.Row(controls=[data_saida, ft.IconButton(icon=ft.icons.CALENDAR_MONTH, on_click=open_date_picker_saida)]),
+                    botao_reserva,
+                    texto_quarto,
+                    data_table
+                ],
                 alignment=ft.MainAxisAlignment.START
             ),
             padding=20
         ),
     )
-
     tabs = ft.Tabs(
         selected_index=0,
         animation_duration=300,
@@ -220,5 +250,6 @@ def main(page: ft.Page):
     )
 
     page.add(tabs)
+
 
 ft.app(main)
