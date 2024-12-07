@@ -140,7 +140,7 @@ class SistemaVendas:
 sistema = SistemaVendas()
 
 while True:
-    print("\n=== MENU DO SISTEMA ===")
+    print("\nMENU DO SISTEMA")
     print("1 - Adicionar novo produto")
     print("2 - Listar produtos")
     print("3 - Registrar venda")
@@ -148,7 +148,7 @@ while True:
     opcao = input("Escolha uma opção: ")
 
     if opcao == "1":
-        print("\n=== ADICIONAR PRODUTO ===")
+        print("\nADICIONAR PRODUTO")
         nome = input("Nome do produto: ")
         descricao = input("Descrição: ")
         quantidade = int(input("Quantidade: "))
@@ -158,7 +158,7 @@ while True:
         sistema.adicionar_produto(produto)
 
     elif opcao == "2":
-        print("\n=== PRODUTOS CADASTRADOS ===")
+        print("\nPRODUTOS CADASTRADOS")
         produtos = sistema.listar_produtos()
         for produto in produtos:
             print(f"\nID: {produto.id}")
@@ -169,7 +169,7 @@ while True:
             print("---------------------")
 
     elif opcao == "3":
-        print("\n=== REGISTRAR VENDA ===")
+        print("\nREGISTRAR VENDA")
         produto_id = int(input("ID do produto: "))
         quantidade = int(input("Quantidade: "))
 
